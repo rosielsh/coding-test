@@ -1,3 +1,5 @@
+// 문제 : 성격 유형 검사
+
 function solution(survey, choices) {
     var answer = '';
     
