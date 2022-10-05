@@ -1,26 +1,28 @@
-// 문제 : 나무 자르기
-// 알고리즘 : 이분 탐색
+// 문제 : 스택 수열
 const filePath = process.platform === "linux" ? "/dev/stdin" : "input.txt";
-const input = require('fs').readFileSync(filePath).toString().trim().split('\n');
-const [N, M] = input.shift().split(' ').map(x=>+x);
-const tree = input.shift().split(' ').map(x=>+x);
+const [n, ...nums] = require('fs').readFileSync(filePath).toString().trim().split('\n').map(x=>+x);
 
 function solution() {
-    let min = 1;
-    let max = Math.max(...tree);
+    const stack = [];
+    let p = 1;
+    let result = '';
+    
+    for(let i = 0; i<n; i++) {
+        const num = nums[i];
 
-    while(min <= max) {
-        let mid = parseInt((min+max)/2);
-        let result = 0;
-        tree.map(x => {
-            if(x-mid > 0) 
-                 result += x-mid;
-        })
-        
-        if(result < M) max = mid - 1;
-        else if(result >= M) min = mid + 1;
+        while(p <= num) {
+            stack.push(p++);
+            result += '+';
+        }
+
+        if(stack.pop() !== num) {
+            console.log('NO');
+            return;
+        }
+        result += '-';
     }
-    console.log(max);
+
+    console.log(result.split('').join('\n'));
 }
 
 solution();

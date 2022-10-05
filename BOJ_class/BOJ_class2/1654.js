@@ -1,28 +1,33 @@
-// 문제 : 스택 수열
+// 문제 : 랜선 자르기
+// 알고리즘 : 이분 탐색
+
 const filePath = process.platform === "linux" ? "/dev/stdin" : "input.txt";
-const [n, ...nums] = require('fs').readFileSync(filePath).toString().trim().split('\n').map(x=>+x);
+const input = require('fs').readFileSync(filePath).toString().trim().split('\n');
+const [K, N] = input.shift().split(' ');
+const lines = [...input].map(x => +x);
 
 function solution() {
-    const stack = [];
-    let p = 1;
-    let result = '';
-    
-    for(let i = 0; i<n; i++) {
-        const num = nums[i];
+    let left = 1;
+    let right = Math.max(...lines);
+    let mid;
 
-        while(p <= num) {
-            stack.push(p++);
-            result += '+';
-        }
+    while(left <= right) {
+        mid = parseInt((left+right) / 2);
 
-        if(stack.pop() !== num) {
-            console.log('NO');
-            return;
+        const result = lines.reduce((acc, cur) => {
+            return acc + parseInt(cur/mid)
+        }, 0);
+
+        if(result < N) { // 만들고자하는 랜선보다 적으면
+            right = mid - 1;// 단위를 작게 해주어야 한다.
+        } 
+        else if(result >= N) { 
+            // 같은 경우도 포함하는 이유 : 어쨌든 N와 가깝게(result를 줄이려면) 만들려면 나누는 단위를 늘려야 하기 때문
+            left = mid + 1;
         }
-        result += '-';
     }
-
-    console.log(result.split('').join('\n'));
+    console.log(right);
+    
 }
 
 solution();
