@@ -1,33 +1,64 @@
-// 문제 : 랜선 자르기
-// 알고리즘 : 이분 탐색
-
+// 문제 : 체스판 다시 칠하기
+// 반복문으로 하다가 오래 걸림
+// 체스판을 미리 생성한다면 쉽게 해결되는 문제
 const filePath = process.platform === "linux" ? "/dev/stdin" : "input.txt";
-const input = require('fs').readFileSync(filePath).toString().trim().split('\n');
-const [K, N] = input.shift().split(' ');
-const lines = [...input].map(x => +x);
+const input = require('fs').readFileSync(filePath).toString().trim().split('\r\n');
+const [N, M] = input.shift().split(' ');
+const board = [];
+for(let i = 0; i<N; i++) {
+    board.push(input.shift().split(''));
+}
 
-function solution() {
-    let left = 1;
-    let right = Math.max(...lines);
-    let mid;
+const white = [
+    "WBWBWBWB",
+    "BWBWBWBW",
+    "WBWBWBWB",
+    "BWBWBWBW",
+    "WBWBWBWB",
+    "BWBWBWBW",
+    "WBWBWBWB",
+    "BWBWBWBW",
+  ];
+  
+  const black = [
+    "BWBWBWBW",
+    "WBWBWBWB",
+    "BWBWBWBW",
+    "WBWBWBWB",
+    "BWBWBWBW",
+    "WBWBWBWB",
+    "BWBWBWBW",
+    "WBWBWBWB",
+  ];
 
-    while(left <= right) {
-        mid = parseInt((left+right) / 2);
+const check = (i, j) => {
+    let countA = 0;
+    let countB = 0;
 
-        const result = lines.reduce((acc, cur) => {
-            return acc + parseInt(cur/mid)
-        }, 0);
+    for(let a = 0; a<8; a++) {
+        for(let b = 0; b<8; b++) {
+            
+            if(white[a][b] !== board[i+a][j+b]){
+                countA++;
+            }
 
-        if(result < N) { // 만들고자하는 랜선보다 적으면
-            right = mid - 1;// 단위를 작게 해주어야 한다.
-        } 
-        else if(result >= N) { 
-            // 같은 경우도 포함하는 이유 : 어쨌든 N와 가깝게(result를 줄이려면) 만들려면 나누는 단위를 늘려야 하기 때문
-            left = mid + 1;
+            if(black[a][b] !== board[i+a][j+b]){
+                countB++;
+            }
         }
     }
-    console.log(right);
-    
+    return countA > countB ? countA : countB;
+}
+
+function solution() {
+    let cntList = [];
+    for(let i = 0; i+8 <= N; i++) {
+        for(let j = 0; j+8 <= M; j++) {
+            cntList.push(check(i, j));
+        }
+    }
+
+    console.log(Math.min(...cntList));
 }
 
 solution();
