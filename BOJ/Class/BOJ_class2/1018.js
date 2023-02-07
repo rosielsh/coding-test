@@ -1,65 +1,63 @@
-// 문제 : 체스판 다시 칠하기
-// 반복문으로 하다가 오래 걸림
-// 체스판을 미리 생성한다면 쉽게 해결되는 문제
-// 알고리즘 : 브루트 포스
-const filePath = process.platform === "linux" ? "/dev/stdin" : "input.txt";
-const input = require('fs').readFileSync(filePath).toString().trim().split('\r\n');
-const [N, M] = input.shift().split(' ');
-const board = [];
-for(let i = 0; i<N; i++) {
-    board.push(input.shift().split(''));
+// 체스판 다시 칠하기
+
+const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
+const input = require('fs').readFileSync(filePath).toString().trim().split('\n');
+const [N, M] = input.shift().split(' ').map(Number);
+const chess = input.map(x=>x.replace('\r', ''));
+
+const blackFirst = [
+  'BWBWBWBW',
+  'WBWBWBWB',
+  'BWBWBWBW',
+  'WBWBWBWB',
+  'BWBWBWBW',
+  'WBWBWBWB',
+  'BWBWBWBW',
+  'WBWBWBWB'
+];
+
+const whiteFirst = [
+  'WBWBWBWB',
+  'BWBWBWBW',
+  'WBWBWBWB',
+  'BWBWBWBW',
+  'WBWBWBWB',
+  'BWBWBWBW',
+  'WBWBWBWB',
+  'BWBWBWBW'
+];
+
+function checkWhite(i, j) {
+  let cnt = 0;
+  for(let a=0; a<8; a++) {
+    for(let b=0; b<8; b++) {
+      if(whiteFirst[a][b] !== chess[a+i][b+j]) cnt++;
+    }
+  }
+  return cnt;
 }
 
-const white = [
-    "WBWBWBWB",
-    "BWBWBWBW",
-    "WBWBWBWB",
-    "BWBWBWBW",
-    "WBWBWBWB",
-    "BWBWBWBW",
-    "WBWBWBWB",
-    "BWBWBWBW",
-  ];
-  
-  const black = [
-    "BWBWBWBW",
-    "WBWBWBWB",
-    "BWBWBWBW",
-    "WBWBWBWB",
-    "BWBWBWBW",
-    "WBWBWBWB",
-    "BWBWBWBW",
-    "WBWBWBWB",
-  ];
-
-const check = (x, y) => {
-    let countA = 0;
-    let countB = 0;
-
-    for(let i = y; i<y+8; i++) { // 행
-        for(let j = x; j<x+8; j++) { // 열
-            
-            if(white[i][j] !== board[i-y][j-x]){
-                countA++;
-            }
-
-            if(black[i][j] !== board[i-y][j-x]){
-                countB++;
-            }
-        }
+function checkBlack(i, j) {
+  let cnt = 0;
+  for(let a=0; a<8; a++) {
+    for(let b=0; b<8; b++) {
+      if(blackFirst[a][b] !== chess[a+i][b+j]) cnt++;
     }
-    return countA > countB ? countB : countA;
+  }
+  return cnt;
 }
 
 function solution() {
-    let cntList = [];
-    for(let i = 0; i+8 <= N; i++) {
-        for(let j = 0; j+8 <= M; j++) {
-            cntList.push(check(j, i));
-        }
+  let answer = Number.MAX_SAFE_INTEGER;
+  let cnt = 0;
+  for(let i=0; i<=N-8; i++) {
+    for(let j=0; j<=M-8; j++) {
+      cnt = 0;
+      cnt += Math.min(checkWhite(i, j), checkBlack(i, j));
+      answer = Math.min(answer, cnt);
     }
-
-    console.log(Math.min(...cntList));
+  }
+  return answer;
 }
 
-solution();
+console.log(solution());
