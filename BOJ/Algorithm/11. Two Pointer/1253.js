@@ -8,7 +8,7 @@ numbers = numbers
   .map(Number)
   .sort((a, b) => a - b);
 
-function binarySearch(index, currentNum) {
+function search(index, currentNum) {
   let left = 0;
   let right = N - 1;
   let sum;
@@ -38,7 +38,7 @@ function solution() {
   if (N <= 2) return 0;
 
   for (let i = 0; i < N; i++) {
-    if (binarySearch(i, numbers[i])) answer++;
+    if (search(i, numbers[i])) answer++;
   }
   return answer;
 }
