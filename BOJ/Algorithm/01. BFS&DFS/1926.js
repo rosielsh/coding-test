@@ -1,40 +1,53 @@
+// 그림
+
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-const input = require('fs').readFileSync(filePath).toString().trim().split('\n');
-const [n, m] = input.shift().split(' ').map(x=>+x);
-const paper = input.map(x=>x.split(' ').map(x=>+x));
+[NM, ...paper] = require("fs").readFileSync(filePath).toString().trim().split("\n");
+[N, M] = NM.split(" ").map(Number);
+paper = paper.map((x) => x.split(" ").map(Number));
+
+const dx = [-1, 1, 0, 0];
+const dy = [0, 0, -1, 1];
+
+function bfs(startX, startY) {
+  const queue = [[startX, startY]];
+  let cnt = 1;
+  paper[startX][startY] = 0;
+
+  while (queue.length) {
+    [curX, curY] = queue.shift();
+
+    for (let i = 0; i < 4; i++) {
+      nx = curX + dx[i];
+      ny = curY + dy[i];
+
+      if (nx < 0 || nx >= N || ny < 0 || ny >= M || !paper[nx][ny]) continue;
+
+      paper[nx][ny] = 0;
+      queue.push([nx, ny]);
+      cnt++;
+    }
+  }
+
+  return cnt;
+}
 
 function solution() {
-  const ans_list = [];
-  let answer = 0;
-  let needVisit = [];
-  const pos = [[0, 1], [1, 0], [-1, 0], [0, -1]];
-
-  for(let i=0; i<n; i++) {
-    for(let j=0; j<m; j++) {
-      if(paper[i][j]) {
-        needVisit = [[i, j]];
-        answer = 0;
-        while(needVisit.length) {
-          const [ypos, xpos] = needVisit.shift();
-          
-          for(let k=0; k<4; k++) {
-            const Y = ypos + pos[k][0];
-            const X = xpos + pos[k][1];
-
-            if(Y < 0 || Y > n-1 || X < 0 || X > m-1) continue;
-
-            if(paper[Y][X] === 1) {
-              paper[Y][X] = 0;
-              needVisit.push([Y, X]);
-              answer++;
-            }
-          }
-        }
-        ans_list.push(answer === 0?1:answer);
+  let answer = "";
+  let paperSize = [];
+  for (let i = 0; i < N; i++) {
+    for (let j = 0; j < M; j++) {
+      if (paper[i][j]) {
+        paperSize.push(bfs(i, j));
       }
     }
   }
-  return [ans_list.length, Math.max(...ans_list)].join('\n');
+
+  answer += `${paperSize.length}\n`;
+  answer += `${Math.max(...paperSize)}`;
+
+  if (!paperSize.length) return "0\n0";
+
+  return answer;
 }
 
 console.log(solution());
