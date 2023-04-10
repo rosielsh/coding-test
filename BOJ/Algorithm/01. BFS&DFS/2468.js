@@ -1,42 +1,75 @@
+// 안전 영역
+
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-const input = require('fs').readFileSync(filePath).toString().trim().split('\n');
-const N = +input.shift();
-const area = input.map(x=>x.replace('\r','').split(' ').map(x=>+x));
-let cnt;
+[N, ...area] = require("fs").readFileSync(filePath).toString().trim().split("\n");
+N = +N;
+area = area.map((arr) => arr.split(" ").map(Number));
 
-function DFS(startY, startX, height) {
-  const needVisit = [[startY, startX]];
-  const pos = [[0, -1], [0, 1], [1, 0], [-1, 0]];
+let copyArea = [];
+let visited = [];
+const dx = [-1, 1, 0, 0];
+const dy = [0, 0, -1, 1];
 
-  while(needVisit.length) {
-    const [curY, curX] = needVisit.pop();
-    
-    for(let i=0; i<4; i++) {
-      const adjY = curY + pos[i][0];
-      const adjX = curX + pos[i][1];
+function bfs(startX, startY, waterHeight) {
+  const queue = [[startX, startY]];
+  visited[startX][startY] = 1;
 
-      if(adjY < 0 || adjY >= N || adjX < 0 || adjX >= N) continue;
+  while (queue.length) {
+    [curX, curY] = queue.shift();
 
-      if(area[adjY][adjX] > height) { // height보다 높은 건물들만 안전영역
-        area[adjY][adjX] = 0; // 방문 표시
-        needVisit.push([adjY, adjX]);
-      }
+    for (let i = 0; i < 4; i++) {
+      nx = curX + dx[i];
+      ny = curY + dy[i];
+
+      if (
+        nx < 0 ||
+        nx >= N ||
+        ny < 0 ||
+        ny >= N ||
+        visited[nx][ny] ||
+        copyArea[nx][ny] <= waterHeight
+      )
+        continue;
+
+      visited[nx][ny] = 1;
+      copyArea[nx][ny] = -1;
+      queue.push([nx, ny]);
     }
-    console.log(needVisit);
   }
-} 
- 
+}
+
 function solution() {
   let answer;
-  cnt = 0;
 
-  for(let h=1; h<100; h++) { // 높이
-    for(let j=0; j<N; j++) {
-      for(let k=0; k<N; k++) {
-        DFS(j, k, h);  // 2차원 배열 돌면서 영역 갯수 카운트
-      }
+  let minValue = Number.MAX_SAFE_INTEGER;
+  let maxValue = Number.MIN_SAFE_INTEGER;
+
+  for (let i = 0; i < N; i++) {
+    for (let j = 0; j < N; j++) {
+      minValue = Math.min(minValue, area[i][j]);
+      maxValue = Math.max(maxValue, area[i][j]);
     }
   }
+
+  let maxSafeAreaCnt = Number.MIN_SAFE_INTEGER;
+
+  for (let k = minValue; k <= maxValue; k++) {
+    let totalSafeAreaCnt = 0;
+    copyArea = area.map((v) => [...v]);
+    visited = Array.from({ length: N }, () => Array(N).fill(0));
+    for (let i = 0; i < N; i++) {
+      for (let j = 0; j < N; j++) {
+        // 물의 높이인 k보다 높아야 물에 잠기지 않는 안전 영역
+        if (copyArea[i][j] > k) {
+          bfs(i, j, k);
+          totalSafeAreaCnt++;
+        }
+      }
+    }
+    maxSafeAreaCnt = Math.max(maxSafeAreaCnt, totalSafeAreaCnt);
+  }
+
+  answer = maxSafeAreaCnt === 0 ? 1 : maxSafeAreaCnt;
   return answer;
 }
 
