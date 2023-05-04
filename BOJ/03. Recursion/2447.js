@@ -1,27 +1,33 @@
-// 별 찍기 (다시)
+// 별 찍기 - 10
 
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-const n = require("fs").readFileSync(filePath).toString().trim();
-let answer = [];
+const N = require("fs").readFileSync(filePath).toString().trim().split("\n").map(Number)[0];
 
-function star(i, j, n) {
-  if (i % 3 === 1 && j % 3 === 1) {
-    answer.push(" ");
-  } else if (n === 1) {
-    answer.push("*");
-  } else {
-    star(parseInt(i / 3), parseInt(j / 3), parseInt(n / 3));
-  }
+let tempCnt = 3;
+function makeRect(depth, currentRect) {
+  if (3 ** depth === N) return currentRect;
+
+  const nextRect = currentRect.split("\n").map((rows) => {
+    return rows.repeat(3);
+  });
+
+  currentRect.split("\n").map((rows) => {
+    nextRect.push(rows + " ".repeat(tempCnt) + rows);
+  });
+
+  currentRect.split("\n").map((rows) => {
+    nextRect.push(rows.repeat(3));
+  });
+
+  tempCnt *= 3;
+  return makeRect(depth + 1, nextRect.join("\n"));
 }
 
 function solution() {
-  for (let i = 0; i < n; i++) {
-    for (let j = 0; j < n; j++) {
-      star(i, j, n);
-    }
-    answer.push("\n");
-  }
-  return answer.join("");
+  let answer;
+  const init = "***\n* *\n***";
+  answer = makeRect(1, init);
+  return answer;
 }
 
 console.log(solution());
