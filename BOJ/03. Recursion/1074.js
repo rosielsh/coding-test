@@ -1,28 +1,35 @@
-// Z
-
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-const [N, r, c] = require("fs").readFileSync(filePath).toString().trim().split(" ");
+const [N, R, C] = require("fs").readFileSync(filePath).toString().trim().split(" ").map(Number);
+
 let cnt = 0;
 
-function solution(y, x, size) {
+function search(size, r, c) {
   if (size === 1) {
+    console.log(cnt);
     return;
   }
 
-  let nextSize = parseInt(size / 2);
-  if (r < y + nextSize && c < x + nextSize) {
-    solution(y, x, nextSize);
-  } else if (r < y + nextSize && c >= x + nextSize) {
-    cnt += ((size * size) / 4) * 1;
-    solution(y, x + nextSize, nextSize);
-  } else if (r >= y + nextSize && c < x + nextSize) {
-    cnt += ((size * size) / 4) * 2;
-    solution(y + nextSize, x, nextSize);
-  } else {
-    cnt += ((size * size) / 4) * 3;
-    solution(y + nextSize, x + nextSize, nextSize);
+  const nextSize = parseInt(size / 2);
+
+  // 왼쪽 위
+  if (R < r + nextSize && C < c + nextSize) {
+    search(nextSize, r, c);
   }
-  return cnt;
+  // 오른쪽 위
+  else if (R < r + nextSize && C >= c + nextSize) {
+    cnt += nextSize * nextSize;
+    search(nextSize, r, c + nextSize);
+  }
+  // 왼쪽 아래
+  else if (R >= r + nextSize && C < c + nextSize) {
+    cnt += nextSize * nextSize * 2;
+    search(nextSize, r + nextSize, c);
+  }
+  // 오른쪽 아래
+  else if (R >= r + nextSize && C >= c + nextSize) {
+    cnt += nextSize * nextSize * 3;
+    search(nextSize, r + nextSize, c + nextSize);
+  }
 }
 
-console.log(solution(0, 0, 2 ** N));
+search(2 ** N, 0, 0);
