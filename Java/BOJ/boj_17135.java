@@ -1,3 +1,5 @@
+package BOJ;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -13,11 +15,11 @@ import java.util.StringTokenizer;
 
 public class boj_17135 {
 	static int N, M, D;
-	static int[][] map; 
-	static int maxValue; 
+	static int[][] map;
+	static int maxValue;
 	static int[][] gungSu;
 	static List<int[]> enemy;
-	
+
 	static void simulation() {
 		enemy = new ArrayList<>();
 		for (int i = 0; i < N; i++) {
@@ -27,7 +29,7 @@ public class boj_17135 {
 				}
 			}
 		}
-		
+
 		int killCnt = 0;
 		while (!enemy.isEmpty()) {
 			Set<Integer> kill = new HashSet<>();
@@ -44,12 +46,13 @@ public class boj_17135 {
 
 				Collections.sort(candidate, (int[] a, int[] b) -> {
 					if (a[2] == b[2]) {
-						return a[1] - b[1]; 
+						return a[1] - b[1];
 					}
 					return a[2] - b[2];
 				});
 
-				if(candidate.isEmpty()) continue;
+				if (candidate.isEmpty())
+					continue;
 				kill.add(candidate.get(0)[3]);
 			}
 
@@ -58,14 +61,14 @@ public class boj_17135 {
 				enemy.set(iter.next(), null);
 				killCnt++;
 			}
-			
-			for(int i=0; i< enemy.size(); i++) {
-				if(enemy.get(i) == null) {
+
+			for (int i = 0; i < enemy.size(); i++) {
+				if (enemy.get(i) == null) {
 					enemy.remove(i);
 					i--;
 				}
 			}
-        
+
 			for (int j = 0; j < enemy.size(); j++) {
 				if (enemy.get(j)[0] + 1 == N) {
 					enemy.remove(j);
@@ -75,7 +78,7 @@ public class boj_17135 {
 				}
 			}
 		}
-		
+
 		maxValue = Math.max(maxValue, killCnt);
 	}
 
@@ -116,7 +119,7 @@ public class boj_17135 {
 		}
 
 		combi(0, 0);
-		
+
 		System.out.println(maxValue);
 	}
 
