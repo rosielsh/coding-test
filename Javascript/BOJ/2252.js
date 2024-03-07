@@ -1,34 +1,41 @@
-// 줄 세우기
-
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
 const input = require("fs").readFileSync(filePath).toString().trim().split("\n");
+
 const [N, M] = input.shift().split(" ").map(Number);
+const student = input.map((x) => x.split(" ").map(Number));
+
+const result = [];
+
 const graph = Array.from({ length: N + 1 }, () => []);
 const indegree = Array.from({ length: N + 1 }, () => 0);
-input.forEach((x) => {
-  [a, b] = x.split(" ").map(Number);
-  graph[a].push(b);
-  indegree[b] += 1;
-});
+
+for (let [a, b] of student) {
+    graph[a].push(b);
+    indegree[b]++;
+}
 
 const queue = [];
+
 for (let i = 1; i <= N; i++) {
-  if (indegree[i] === 0) queue.push(i);
+    if (!indegree[i]) {
+        queue.push(i);
+    }
 }
 
-function solution() {
-  let answer = [];
-  let curNode;
-  while (queue.length) {
-    curNode = queue.shift();
-    answer.push(curNode);
-    graph[curNode].forEach((x) => {
-      indegree[x] -= 1;
-      if (!indegree[x]) queue.push(x);
-    });
-  }
+while (queue.length > 0) {
+    const node = queue.shift();
 
-  return answer.join(" ");
+    result.push(node);
+
+    for (let i = 0; i < graph[node].length; i++) {
+        const next = graph[node][i];
+
+        indegree[next]--;
+
+        if (!indegree[next]) {
+            queue.push(next);
+        }
+    }
 }
 
-console.log(solution());
+console.log(result.join(" "));
