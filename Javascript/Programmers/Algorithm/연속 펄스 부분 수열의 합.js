@@ -40,3 +40,26 @@ function solution(sequence) {
 
     return answer;
 }
+
+// dp 풀이
+// const seq1 = sequence.map((ele, idx) => {
+//     if(idx % 2 === 1) {
+//         return -ele;
+//     } return ele;
+// });
+
+// const seq2 = sequence.map((ele, idx) => {
+//     if(idx % 2 === 0) {
+//         return -ele;
+//     } return ele;
+// });
+
+// const dp1 = Array.from({length: N+1}, () => 0);
+// const dp2 = Array.from({length: N+1}, () => 0);
+
+// for(let i=1; i<=N; i++) {
+//     dp1[i] = Math.max(dp1[i-1] + seq1[i-1], seq1[i-1]);
+//     dp2[i] = Math.max(dp2[i-1] + seq2[i-1], seq2[i-1]);
+
+//     answer = Math.max(dp1[i], dp2[i], answer);
+// }
