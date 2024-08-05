@@ -14,7 +14,7 @@ for (let i = 0; i < N; i++) {
         j++;
     }
 
-    answer = Math.max(answer, j - i - 1 - (hCnt - 1));
+    answer = Math.max(answer, j - i - hCnt);
 
     hCnt -= S[i] % 2 === 1 ? 1 : 0;
 }
