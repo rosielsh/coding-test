@@ -1,30 +1,19 @@
-// 주유소
-
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-[N, road, price] = require("fs").readFileSync(filePath).toString().trim().split("\n");
-N = +N;
-road = road.split(" ").map(Number);
-price = price
-  .split(" ")
-  .map(Number)
-  .slice(0, N - 1);
+const input = require("fs").readFileSync(filePath).toString().trim().split("\n");
 
-const minPrice = Math.min(...price);
-let totalRoad = road.reduce((acc, cur) => acc + cur, 0);
+const N = +input[0];
+const dist = input[1].split(" ").map(BigInt);
+const cost = input[2].split(" ").map(BigInt);
 
-function solution() {
-  let answer = 0;
-
-  for (let i = 0; i < N; i++) {
-    if (price[i] === minPrice) {
-      answer += totalRoad * price[i];
-      return answer;
+let minCost = Number.MAX_SAFE_VALUE;
+let sum = BigInt(0);
+for (let i = 0; i < N - 1; i++) {
+    if (cost[i] > minCost) {
+        sum += minCost * dist[i];
     } else {
-      answer += road[i] * price[i];
-      totalRoad -= road[i];
+        sum += cost[i] * dist[i];
+        minCost = cost[i];
     }
-  }
-  return answer;
 }
 
-console.log(solution());
+console.log(sum.toString());
