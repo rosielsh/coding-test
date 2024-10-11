@@ -1,34 +1,36 @@
-// 공유기 설치
-
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
 const input = require("fs").readFileSync(filePath).toString().trim().split("\n");
+
 const [N, C] = input.shift().split(" ").map(Number);
 const house = input.map(Number).sort((a, b) => a - b);
 
-function isPossible(dist) {
-  let cnt = 1;
-  let std = house[0];
-  for (let i = 1; i <= N; i++) {
-    if (dist <= house[i] - std) {
-      cnt++;
-      std = house[i];
+const isPossible = (dist) => {
+    let cnt = 1;
+    let prevPos = house[0];
+
+    for (let i = 1; i < N; i++) {
+        if (house[i] - prevPos >= dist) {
+            cnt++;
+            prevPos = house[i];
+        }
     }
-  }
-  return cnt >= C ? true : false;
-}
 
-function solution() {
-  let left = 1;
-  let right = house[N - 1] - house[0];
-  let mid;
+    return cnt >= C;
+};
 
-  while (left <= right) {
-    mid = parseInt((left + right) / 2);
+let left = 1;
+let right = house[N - 1] - house[0];
+let maxDist = 0;
+
+while (left <= right) {
+    const mid = parseInt((left + right) / 2);
+
     if (isPossible(mid)) {
-      left = mid + 1;
-    } else right = mid - 1;
-  }
-  return right;
+        left = mid + 1;
+        maxDist = Math.max(maxDist, mid);
+    } else {
+        right = mid - 1;
+    }
 }
 
-console.log(solution());
+console.log(maxDist);
