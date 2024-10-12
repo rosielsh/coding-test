@@ -2,40 +2,29 @@ function solution(genres, plays) {
     var answer = [];
 
     const map = new Map();
+    const total = new Map();
 
-    genres.forEach((genre, idx) => {
-        if (map.has(genre)) {
-            map.set(genre, [...map.get(genre), [idx, plays[idx]]]);
-        } else {
-            map.set(genre, [[idx, plays[idx]]]);
-        }
-    });
+    const N = genres.length;
 
-    const playsSum = [];
-    map.forEach((value, genre) => {
-        value.sort((a, b) => {
+    for (let i = 0; i < N; i++) {
+        map.set(genres[i], [...(map.get(genres[i]) || []), [i, plays[i]]]);
+        total.set(genres[i], (total.get(genres[i]) || 0) + plays[i]);
+    }
+
+    const sortedGenre = [...total.entries()].sort((a, b) => b[1] - a[1]);
+
+    for (let [gen, cnt] of sortedGenre) {
+        const sortedSong = map.get(gen).sort((a, b) => {
             if (a[1] === b[1]) return a[0] - b[0];
-            else return b[1] - a[1];
+            return b[1] - a[1];
         });
 
-        let sum = 0;
-        Object.values(value).forEach((play) => {
-            sum += play[1];
-        });
-        playsSum.push([genre, sum]);
-    });
+        for (let i = 0; i < sortedSong.length; i++) {
+            answer.push(sortedSong[i][0]);
 
-    playsSum
-        .sort((a, b) => b[1] - a[1])
-        .forEach(([genre, plays]) => {
-            let totalLen = map.get(genre).length;
-            let cnt = 0;
-            for (let i = 0; i < totalLen; i++) {
-                if (cnt === 2) break;
-                answer.push(map.get(genre)[i][0]);
-                cnt++;
-            }
-        });
+            if (i === 1) break;
+        }
+    }
 
     return answer;
 }
