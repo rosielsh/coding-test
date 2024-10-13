@@ -1,31 +1,29 @@
-const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-const word = require('fs').readFileSync(filePath).toString().trim().split('');
-const consonant = ['A', 'E', 'I', 'O', 'U'];
-const combination = Array.from({length: 5}, () => 0);
-let cnt = 0;
-let answer = 0;
+function solution(word) {
+    var answer = 0;
 
-function solution(idx) {
+    const arr = ["A", "E", "I", "O", "U"];
 
-  if(idx === 6) {
-    return;
-  }
+    let cnt = 0;
+    let find = false;
+    const dfs = (depth, res) => {
+        if (res === word) {
+            find = true;
+            answer = cnt;
+            return;
+        }
 
-  const c = combination.join('').replaceAll('0','');
-  const w = word.join('');
+        cnt++;
 
-  if(c === w) {
-    answer = cnt;
-    return;
-  }
+        if (find || depth === 5) {
+            return;
+        }
 
-  cnt++;
-  for(let i=0; i<5; i++) {
-    combination[idx] = consonant[i];
-    solution(idx+1);
-    combination[idx] = 0;
-  }
+        for (let i = 0; i < 5; i++) {
+            dfs(depth + 1, res + arr[i]);
+        }
+    };
+
+    dfs(0, "");
+
+    return answer;
 }
-
-solution(0);
-console.log(answer);
