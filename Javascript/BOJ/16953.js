@@ -1,55 +1,24 @@
-// A → B
-
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-[A, B] = require("fs").readFileSync(filePath).toString().trim().split(" ").map(Number);
+const input = require("fs").readFileSync(filePath).toString().trim().split("\n");
 
-function solution() {
-  let answer = 1;
-  while (B >= A) {
-    if (A === B) return answer;
-    if (B % 2 === 0) {
-      B = parseInt(B / 2);
-      answer++;
-    } else if (B % 10 === 1) {
-      B = parseInt(B / 10);
-      answer++;
-    } else break;
-  }
-  return -1;
-}
+let [A, B] = input[0].split(" ").map(Number);
 
-console.log(solution());
+let answer = Number.MAX_SAFE_INTEGER;
 
-// bfs 풀이
+const dfs = (x, cnt) => {
+    if (x <= A) {
+        if (x === A) {
+            answer = Math.min(answer, cnt);
+        }
+        return;
+    }
 
-// const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-// [A, B] = require('fs').readFileSync(filePath).toString().trim().split(' ');
-// A = +A;
-// B = +B;
+    if (x % 10 === 1) {
+        dfs(parseInt(x / 10), cnt + 1);
+    } else if (x % 2 === 0) {
+        dfs(x / 2, cnt + 1);
+    }
+};
 
-// function solution(start) {
-//   const needVisit = [[start, 0]];
-//   let count = 0;
-
-//   while(needVisit.length) {
-//     [curNum, cnt] = needVisit.shift();
-
-//     if(curNum === B) {
-//       count = cnt;
-//       break;
-//     }
-
-//     if(curNum * 2 <= B) {
-//       needVisit.push([curNum*2, cnt+1]);
-//     }
-
-//     if(Number(String(curNum)+'1') <= B) {
-//       needVisit.push([Number(String(curNum)+'1'), cnt+1]);
-//     }
-//   }
-
-//   if(!count) return -1;
-//   return count+1;
-// }
-
-// console.log(solution(A));
+dfs(B, 0);
+console.log(answer === Number.MAX_SAFE_INTEGER ? -1 : answer + 1);
