@@ -1,42 +1,39 @@
 function solution(n, computers) {
-  var answer = 0;
+    var answer = 0;
 
-  const graph = Array.from({ length: n + 1 }, () => []);
-  for (let i = 0; i < computers.length; i++) {
-    for (let j = i + 1; j < computers[0].length; j++) {
-      if (computers[i][j]) {
-        graph[i + 1].push(j + 1);
-        graph[j + 1].push(i + 1);
-      }
+    const graph = Array.from({ length: n }, () => []);
+
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < i; j++) {
+            if (computers[i][j]) {
+                graph[i].push(j);
+                graph[j].push(i);
+            }
+        }
     }
-  }
 
-  function dfs(startVertex) {
-    visited[startVertex] = 1;
-    const stack = [[startVertex]];
+    const visited = Array.from({ length: n }, () => false);
 
-    while (stack.length) {
-      let curVertex = stack.pop();
+    const bfs = (x) => {
+        visited[x] = true;
+        const queue = [x];
 
-      for (let i = 0; i < graph[curVertex].length; i++) {
-        const nextVertex = graph[curVertex][i];
+        while (queue.length > 0) {
+            const cur = queue.shift();
 
-        if (visited[nextVertex]) continue;
+            for (let next of graph[cur]) {
+                if (visited[next]) continue;
+                visited[next] = true;
+                queue.push(next);
+            }
+        }
+    };
 
-        visited[nextVertex] = 1;
-        stack.push(nextVertex);
-      }
+    for (let i = 0; i < n; i++) {
+        if (visited[i]) continue;
+        answer++;
+        bfs(i);
     }
-  }
 
-  const visited = Array.from({ length: n + 1 }, () => 0);
-  let cnt = 0;
-  for (let i = 1; i <= n; i++) {
-    if (!visited[i]) {
-      dfs(i);
-      cnt++;
-    }
-  }
-  answer = cnt;
-  return answer;
+    return answer;
 }
