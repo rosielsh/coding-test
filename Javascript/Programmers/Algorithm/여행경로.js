@@ -1,45 +1,36 @@
 function solution(tickets) {
     var answer = [];
-    const answers = [];
 
-    const graph = {};
+    const N = tickets.length;
+    const map = new Map();
 
-    for (let [from, to] of tickets) {
-        if (graph[from]) graph[from].push([to, 0]);
-        else graph[from] = [[to, 0]];
+    for (let i = 0; i < N; i++) {
+        const [from, to] = tickets[i];
+        if (!map.has(from)) map.set(from, []);
+        map.set(from, [...map.get(from), [i, to]]);
     }
 
-    for (let key of Object.keys(graph)) {
-        graph[key].sort();
-    }
-
-    const dfs = (depth, cur, route) => {
-        if (depth === tickets.length) {
-            answers.push([...route]);
+    const dfs = (cnt, used, cur, route) => {
+        if (cnt === N) {
+            answer.push(route);
             return;
         }
 
-        if (!graph[cur]) return;
+        if (!map.has(cur)) return;
 
-        for (let i = 0; i < graph[cur].length; i++) {
-            const [next, isUsed] = graph[cur][i];
-
-            if (isUsed) continue;
-
-            graph[cur][i][1] = 1;
+        for (let [idx, next] of map.get(cur)) {
+            if (used[idx]) continue;
+            used[idx] = true;
             route.push(next);
-
-            dfs(depth + 1, next, route);
-
-            graph[cur][i][1] = 0;
+            dfs(cnt + 1, used, next, [...route]);
+            used[idx] = false;
             route.pop();
         }
     };
 
-    dfs(0, "ICN", ["ICN"]);
+    const used = Array.from({ length: N }, () => false);
+    dfs(0, used, "ICN", ["ICN"]);
 
-    answers.sort();
-    answer = answers[0];
-
-    return answer;
+    answer.sort();
+    return answer[0];
 }
