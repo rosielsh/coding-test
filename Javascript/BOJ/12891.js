@@ -1,40 +1,35 @@
-// DNA 비밀번호
-
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
 const input = require("fs").readFileSync(filePath).toString().trim().split("\n");
+
 const [S, P] = input[0].split(" ").map(Number);
-const dna = input[1].split("");
-const [a, c, g, t] = input[2].split(" ").map(Number);
-let cnt = Array.from({ length: 4 }, () => 0);
-let dp = Array.from({ length: S + 1 }, () => Array(4).fill(0));
+const password = input[1].split("");
+const minCnt = input[2].split(" ").map(Number);
 
-function solution() {
-  let answer = 0;
-  for (let i = 1; i <= S; i++) {
-    if (dna[i - 1] === "A") dp[i][0] = dp[i - 1][0] + 1;
-    else dp[i][0] = dp[i - 1][0];
+const cnt = Array(4).fill(0); // A C G T의 최소 개수
 
-    if (dna[i - 1] === "C") dp[i][1] = dp[i - 1][1] + 1;
-    else dp[i][1] = dp[i - 1][1];
+const convertIdx = (str) => {
+    if (str === "A") return 0;
+    else if (str === "C") return 1;
+    else if (str === "G") return 2;
+    else if (str === "T") return 3;
+};
 
-    if (dna[i - 1] === "G") dp[i][2] = dp[i - 1][2] + 1;
-    else dp[i][2] = dp[i - 1][2];
+const check = () => {
+    if (cnt[0] >= minCnt[0] && cnt[1] >= minCnt[1] && cnt[2] >= minCnt[2] && cnt[3] >= minCnt[3])
+        return 1;
+    return 0;
+};
 
-    if (dna[i - 1] === "T") dp[i][3] = dp[i - 1][3] + 1;
-    else dp[i][3] = dp[i - 1][3];
-  }
-
-  for (let i = 0; i < S - P + 1; i++) {
-    cnt[0] = dp[i + P][0] - dp[i][0];
-    cnt[1] = dp[i + P][1] - dp[i][1];
-    cnt[2] = dp[i + P][2] - dp[i][2];
-    cnt[3] = dp[i + P][3] - dp[i][3];
-
-    if (cnt[0] >= a && cnt[1] >= c && cnt[2] >= g && cnt[3] >= t) {
-      answer++;
-    }
-  }
-  return answer;
+for (let i = 0; i < P; i++) {
+    cnt[convertIdx(password[i])]++;
 }
 
-console.log(solution());
+let answer = check() ? 1 : 0;
+
+for (let i = 0; i < S - P; i++) {
+    cnt[convertIdx(password[i])]--;
+    cnt[convertIdx(password[i + P])]++;
+    answer += check();
+}
+
+console.log(answer);
