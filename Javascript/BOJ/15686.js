@@ -1,61 +1,48 @@
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-let [NM, ...city] = require("fs").readFileSync(filePath).toString().trim().split("\n");
-const [N, M] = NM.split(" ").map(Number);
-city = city.map((x) => x.split(" ").map(Number));
+const input = require("fs").readFileSync(filePath).toString().trim().split("\n");
+const [N, M] = input.shift().split(" ").map(Number);
+const map = input.map((x) => x.split(" ").map(Number));
 
-function calcChickenPos() {
-  const pos = [];
-  for (let i = 0; i < N; i++) {
+let answer = Number.MAX_SAFE_INTEGER;
+const chickenPos = [];
+const housePos = [];
+
+for (let i = 0; i < N; i++) {
     for (let j = 0; j < N; j++) {
-      if (city[i][j] === 2) pos.push([i, j]);
+        if (map[i][j] === 1) housePos.push([i, j]);
+        if (map[i][j] === 2) chickenPos.push([i, j]);
     }
-  }
-
-  return pos;
 }
 
-let chickenPos = calcChickenPos();
-let minCityDistance = Number.MAX_SAFE_INTEGER;
-const closed = Array.from({ length: chickenPos.length }, () => 1);
-
-function calcCityDistance() {
-  let cityDistance = 0;
-
-  for (let i = 0; i < N; i++) {
-    for (let j = 0; j < N; j++) {
-      if (city[i][j] === 1) {
-        let minDistance = Number.MAX_SAFE_INTEGER;
-        for (let pos = 0; pos < chickenPos.length; pos++) {
-          if (closed[pos]) continue;
-          const curChickenDistance =
-            Math.abs(i - chickenPos[pos][0]) + Math.abs(j - chickenPos[pos][1]);
-          minDistance = Math.min(minDistance, curChickenDistance);
+const calcSum = (chicken) => {
+    let sum = 0;
+    for (let [x, y] of housePos) {
+        let minDist = Number.MAX_SAFE_INTEGER;
+        for (let [cx, cy] of chicken) {
+            minDist = Math.min(minDist, Math.abs(cx - x) + Math.abs(cy - y));
         }
-        cityDistance += minDistance;
-      }
+        sum += minDist;
     }
-  }
-  minCityDistance = Math.min(cityDistance, minCityDistance);
-}
 
-function combination(depth, idx) {
-  if (depth === M) {
-    calcCityDistance();
-    return;
-  }
+    return sum;
+};
 
-  for (let i = idx; i < chickenPos.length; i++) {
-    closed[i] = 0;
-    combination(depth + 1, i + 1, chickenPos);
-    closed[i] = 1;
-  }
-}
+const cCnt = chickenPos.length;
 
-function solution() {
-  let answer = 0;
-  combination(0, 0);
-  answer = minCityDistance;
-  return answer;
-}
+const dfs = (depth, idx, selected) => {
+    if (depth === M) {
+        const sum = calcSum(selected);
+        if (sum < answer) answer = sum;
+        return;
+    }
 
-console.log(solution());
+    for (let i = idx; i < cCnt; i++) {
+        selected.push(chickenPos[i]);
+        dfs(depth + 1, i + 1, selected);
+        selected.pop();
+    }
+};
+
+dfs(0, 0, []);
+
+console.log(answer);
