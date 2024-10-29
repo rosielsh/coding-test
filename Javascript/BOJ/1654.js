@@ -1,31 +1,28 @@
-// 랜선 자르기
-
-const filePath = process.platform === "linux" ? "/dev/stdin" : "input.txt";
+const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
 const input = require("fs").readFileSync(filePath).toString().trim().split("\n");
-const [K, N] = input.shift().split(" ");
-const lines = [...input].map((x) => +x);
+const [K, N] = input.shift().split(" ").map(Number);
+const lan = input.map(Number);
 
-function solution() {
-  let left = 1;
-  let right = Math.max(...lines);
-  let mid;
+let left = 1;
+let right = Math.max(...lan);
+let maxLen = -1;
 
-  while (left <= right) {
-    mid = parseInt((left + right) / 2);
-
-    const result = lines.reduce((acc, cur) => {
-      return acc + parseInt(cur / mid);
-    }, 0);
-
-    if (result < N) {
-      // 만들고자하는 랜선보다 적으면
-      right = mid - 1; // 단위를 작게 해주어야 한다.
-    } else if (result >= N) {
-      // 같은 경우도 포함하는 이유 : 어쨌든 N와 가깝게(result를 줄이려면) 만들려면 나누는 단위를 늘려야 하기 때문
-      left = mid + 1;
+const possible = (len) => {
+    let cnt = 0;
+    for (let i = 0; i < K; i++) {
+        cnt += parseInt(lan[i] / len);
     }
-  }
-  console.log(right);
+
+    return cnt >= N;
+};
+
+while (left <= right) {
+    const mid = parseInt((left + right) / 2);
+
+    if (possible(mid)) {
+        left = mid + 1;
+        maxLen = Math.max(maxLen, mid);
+    } else right = mid - 1;
 }
 
-solution();
+console.log(maxLen);
