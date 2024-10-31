@@ -6,7 +6,7 @@ const shortRoad = input.map((x) => x.split(" ").map(Number)).sort((a, b) => a[0]
 
 let minDist = Number.MAX_SAFE_INTEGER;
 
-const dfs = (depth, x, y, res, pos) => {
+const dfs = (depth, x, y, res) => {
     if (depth === N) {
         if (y < D) {
             res += D - y;
@@ -15,14 +15,14 @@ const dfs = (depth, x, y, res, pos) => {
         return;
     }
 
-    dfs(depth + 1, x, y, res, pos);
+    dfs(depth + 1, x, y, res);
 
     const [s, e, dist] = shortRoad[depth];
     if (y <= s && e <= D) {
-        dfs(depth + 1, s, e, res + dist + (s - y), pos);
+        dfs(depth + 1, s, e, res + dist + (s - y));
     }
 };
 
-dfs(0, 0, 0, 0, []);
+dfs(0, 0, 0, 0);
 
 console.log(minDist);
