@@ -1,127 +1,87 @@
-// 직사각형으로 나누기
-
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-let [NM, ...rect] = require("fs").readFileSync(filePath).toString().trim().split("\n");
-const [N, M] = NM.split(" ").map(Number);
-rect = rect.map((row) => row.replace("\r", "").split("").map(Number));
+const input = require("fs").readFileSync(filePath).toString().trim().split("\n");
 
-function calcSum(startX, endX, startY, endY) {
-  let sum = 0;
-  for (let i = startX; i <= endX; i++) {
-    for (let j = startY; j <= endY; j++) {
-      sum += rect[i][j];
-    }
+const [N, M] = input.shift().split(" ").map(Number);
+const rect = input.map((x) => x.split("").map(Number));
+
+const prefix = Array.from({ length: N + 1 }, () => Array(M + 1).fill(0));
+
+for (let i = 1; i <= N; i++) {
+  for (let j = 1; j <= M; j++) {
+    prefix[i][j] = prefix[i - 1][j] + prefix[i][j - 1] + rect[i - 1][j - 1] - prefix[i - 1][j - 1];
   }
-  return sum;
 }
 
-function calcSum1() {
-  if (M < 3) return 0;
-  let result = 0;
-  for (let i = 0; i < M - 2; i++) {
-    for (let j = 1; j < M - 1; j++) {
-      for (let k = 2; k < M; k++) {
-        result = Math.max(
-          result,
-          calcSum(0, N - 1, i, j - 1) * calcSum(0, N - 1, j, k - 1) * calcSum(0, N - 1, k, M - 1)
-        );
-      }
-    }
+let answer = 0; // 최대 합의 곱
+
+const calcSum = (x1, y1, x2, y2) => {
+  return prefix[x2][y2] - prefix[x1 - 1][y2] - prefix[x2][y1 - 1] + prefix[x1 - 1][y1 - 1];
+};
+
+// 가로로 3개
+for (let i = 1; i <= N - 2; i++) {
+  for (let j = i + 1; j <= N - 1; j++) {
+    let r1 = calcSum(1, 1, i, M);
+    let r2 = calcSum(i + 1, 1, j, M);
+    let r3 = calcSum(j + 1, 1, N, M);
+
+    answer = Math.max(answer, r1 * r2 * r3);
   }
-
-  return result;
 }
 
-function calcSum2() {
-  if (N < 3) return 0;
-  let result = 0;
-  for (let i = 0; i < N - 2; i++) {
-    for (let j = 1; j < N - 1; j++) {
-      for (let k = 2; k < N; k++) {
-        result = Math.max(
-          result,
-          calcSum(i, j - 1, 0, M - 1) * calcSum(j, k - 1, 0, M - 1) * calcSum(k, N - 1, 0, M - 1)
-        );
-      }
-    }
+// 세로로 3개
+for (let i = 1; i <= M - 2; i++) {
+  for (let j = i + 1; j <= M - 1; j++) {
+    let r1 = calcSum(1, 1, N, i);
+    let r2 = calcSum(1, i + 1, N, j);
+    let r3 = calcSum(1, j + 1, N, M);
+
+    answer = Math.max(answer, r1 * r2 * r3);
   }
-
-  return result;
 }
 
-function calcSum3() {
-  if (N < 2 || M < 2) return 0;
-  let result = 0;
-  for (let i = 0; i < M - 1; i++) {
-    for (let j = 1; j < M; j++) {
-      for (let k = 1; k < N; k++) {
-        result = Math.max(
-          result,
-          calcSum(0, k - 1, 0, j - 1) * calcSum(0, k - 1, j, M - 1) * calcSum(k, N - 1, 0, M - 1)
-        );
-      }
-    }
+// ㅏ
+for (let i = 1; i <= N - 1; i++) {
+  for (let j = 1; j <= M - 1; j++) {
+    let r1 = calcSum(1, 1, N, j);
+    let r2 = calcSum(1, j + 1, i, M);
+    let r3 = calcSum(i + 1, j + 1, N, M);
+
+    answer = Math.max(answer, r1 * r2 * r3);
   }
-
-  return result;
 }
 
-function calcSum4() {
-  if (N < 2 || M < 2) return 0;
-  let result = 0;
-  for (let i = 0; i < M - 1; i++) {
-    for (let j = 1; j < M; j++) {
-      for (let k = 1; k < N; k++) {
-        result = Math.max(
-          result,
-          calcSum(0, k - 1, 0, M - 1) * calcSum(k, N - 1, 0, j - 1) * calcSum(k, N - 1, j, M - 1)
-        );
-      }
-    }
+// ㅓ
+for (let i = 1; i <= N - 1; i++) {
+  for (let j = 1; j <= M - 1; j++) {
+    let r1 = calcSum(1, 1, i, j);
+    let r2 = calcSum(i + 1, 1, N, j);
+    let r3 = calcSum(1, j + 1, N, M);
+
+    answer = Math.max(answer, r1 * r2 * r3);
   }
-
-  return result;
 }
 
-function calcSum5() {
-  if (N < 2 || M < 2) return 0;
-  let result = 0;
-  for (let i = 0; i < N - 1; i++) {
-    for (let j = 1; j < N; j++) {
-      for (let k = 1; k < M; k++) {
-        result = Math.max(
-          result,
-          calcSum(0, j - 1, 0, k - 1) * calcSum(j, N - 1, 0, k - 1) * calcSum(0, N - 1, k, M - 1)
-        );
-      }
-    }
+// ㅗ
+for (let i = 1; i <= N - 1; i++) {
+  for (let j = 1; j <= M - 1; j++) {
+    let r1 = calcSum(1, 1, i, j);
+    let r2 = calcSum(1, j + 1, i, M);
+    let r3 = calcSum(i + 1, 1, N, M);
+
+    answer = Math.max(answer, r1 * r2 * r3);
   }
-
-  return result;
 }
 
-function calcSum6() {
-  if (N < 2 || M < 2) return 0;
-  let result = 0;
-  for (let i = 0; i < N - 1; i++) {
-    for (let j = 1; j < N; j++) {
-      for (let k = 1; k < M; k++) {
-        result = Math.max(
-          result,
-          calcSum(0, N - 1, 0, k - 1) * calcSum(0, j - 1, k, M - 1) * calcSum(j, N - 1, k, M - 1)
-        );
-      }
-    }
+// ㅜ
+for (let i = 1; i <= N - 1; i++) {
+  for (let j = 1; j <= M - 1; j++) {
+    let r1 = calcSum(1, 1, i, M);
+    let r2 = calcSum(i + 1, 1, N, j);
+    let r3 = calcSum(i + 1, j + 1, N, M);
+
+    answer = Math.max(answer, r1 * r2 * r3);
   }
-
-  return result;
 }
 
-function solution() {
-  let answer = 0;
-  answer = Math.max(answer, calcSum1(), calcSum2(), calcSum3(), calcSum4(), calcSum5(), calcSum6());
-
-  return answer;
-}
-
-console.log(solution());
+console.log(answer);
