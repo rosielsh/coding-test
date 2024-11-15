@@ -1,6 +1,3 @@
-// nodejs로 통과 x
-// 같은 로직으로 java로 제출하면 맞음
-
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
 const input = require("fs").readFileSync(filePath).toString().trim().split("\n");
 
@@ -53,4 +50,5 @@ const dfs = (x, y, value, oper) => {
 
 dfs(0, 0, +map[0][0], null);
 
-console.log(maxValue, minValue);
+// console.log(maxValue, minValue); 이렇게 적으면 맞왜틀 당함
+console.log(`${maxValue} ${minValue}`);
