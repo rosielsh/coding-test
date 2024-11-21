@@ -1,25 +1,14 @@
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-const input = require("fs")
-  .readFileSync(filePath)
-  .toString()
-  .trim()
-  .split("\n");
+const input = require("fs").readFileSync(filePath).toString().trim().split("\n");
 
-const N = +input.shift()[0];
+const N = +input.shift();
 const map = input.map((x) => x.split(" "));
 
-const teacher = [];
-const temp = [];
+const teachers = [];
 
 for (let i = 0; i < N; i++) {
   for (let j = 0; j < N; j++) {
-    if (map[i][j] === "T") {
-      teacher.push([i, j]);
-    }
-
-    if (map[i][j] === "X") {
-      temp.push([i, j]);
-    }
+    if (map[i][j] === "T") teachers.push([i, j]);
   }
 }
 
@@ -27,55 +16,57 @@ const dx = [0, 0, -1, 1];
 const dy = [-1, 1, 0, 0];
 
 const search = () => {
-  // 전체 학생들
-  let cnt = 0;
-  // 모든 선생님을 순회
-  for (let i = 0; i < teacher.length; i++) {
-    // 현재 선생님
-    const [x, y] = teacher[i];
-
-    // 4방향 탐색
-    for (let d = 0; d < 4; d++) {
+  for ([x, y] of teachers) {
+    for (let i = 0; i < 4; i++) {
       let dist = 1;
+
+      let nx;
+      let ny;
+
       while (true) {
-        const nx = x + dist * dx[d];
-        const ny = y + dist * dy[d];
+        nx = x + dx[i] * dist;
+        ny = y + dy[i] * dist;
 
         if (nx < 0 || nx >= N || ny < 0 || ny >= N) break;
-        if (map[nx][ny] === "O") break;
-        if (map[nx][ny] === "S") cnt++;
+
+        const next = map[nx][ny];
+        if (next === "O") break;
+        if (next === "S") {
+          return false;
+        }
 
         dist++;
       }
     }
   }
 
-  return cnt;
+  return true;
 };
 
-let isPossible = false;
+let answer = false;
 
-const combi = (depth, idx) => {
-  if (isPossible) return;
+const dfs = (cnt) => {
+  if (answer) return;
 
-  if (depth === 3) {
-    // console.log(map.join("\n"));
-    // 학생 탐색 결과
-    const res = search();
-    if (res === 0) {
-      isPossible = true;
+  if (cnt === 3) {
+    if (search()) {
+      answer = true;
     }
+
     return;
   }
 
-  for (let i = idx; i < temp.length; i++) {
-    const [x, y] = temp[i];
-    map[x][y] = "O";
-    combi(depth + 1, i + 1);
-    map[x][y] = "X";
+  for (let i = 0; i < N; i++) {
+    for (let j = 0; j < N; j++) {
+      if (map[i][j] !== "X") continue;
+
+      map[i][j] = "O";
+      dfs(cnt + 1);
+      map[i][j] = "X";
+    }
   }
 };
 
-combi(0, 0);
+dfs(0);
 
-console.log(isPossible ? "YES" : "NO");
+console.log(answer ? "YES" : "NO");
