@@ -1,40 +1,101 @@
-// 숨바꼭질 3
-
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-[N, K] = require("fs").readFileSync(filePath).toString().trim().split(" ").map(Number);
+const [N, K] = require("fs").readFileSync(filePath).toString().trim().split(" ").map(Number);
 
-function bfs(start) {
-  const queue = [[start, 0]];
-  const visited = Array.from({ length: 200001 }, () => 0);
-  visited[start] = 1;
-
-  while (queue.length) {
-    [curPos, time] = queue.shift();
-
-    if (curPos === K) {
-      return time;
-    }
-
-    // 순간 이동
-    if (2 * curPos >= 0 && 2 * curPos <= 200001 && !visited[2 * curPos]) {
-      visited[2 * curPos] = 1;
-      queue.unshift([2 * curPos, time]);
-    }
-
-    // x+1, x-1 이동
-    for (let x of [curPos + 1, curPos - 1]) {
-      if (x < 0 || x >= 200000) continue;
-      if (visited[x]) continue;
-      visited[x] = 1;
-      queue.push([x, time + 1]);
-    }
+class Node {
+  constructor(pos, time) {
+    this.pos = pos;
+    this.time = time;
   }
 }
 
-function solution() {
-  let answer = 0;
-  answer = bfs(N);
-  return answer;
+class PQ {
+  constructor() {
+    this.heap = [];
+  }
+
+  swap(a, b) {
+    const temp = this.heap[a];
+    this.heap[a] = this.heap[b];
+    this.heap[b] = temp;
+  }
+
+  push(pos, time) {
+    const newNode = new Node(pos, time);
+    this.heap.push(newNode);
+    this.heapifyUp();
+  }
+
+  heapifyUp() {
+    let idx = this.heap.length - 1;
+
+    while (idx > 0) {
+      const pIdx = Math.floor((idx - 1) / 2);
+      if (this.heap[pIdx].time <= this.heap[idx].time) break;
+      this.swap(pIdx, idx);
+      idx = pIdx;
+    }
+  }
+
+  pop() {
+    const front = this.heap[0];
+    if (this.heap.length === 0) return;
+    if (this.heap.length === 1) return this.heap.pop();
+
+    this.heap[0] = this.heap.pop();
+    this.heapifyDown(0);
+
+    return front;
+  }
+
+  heapifyDown(idx) {
+    const leftChildIdx = idx * 2 + 1;
+    const rightChildIdx = idx * 2 + 2;
+
+    let minIdx = idx;
+
+    if (leftChildIdx < this.heap.length && this.heap[leftChildIdx].time < this.heap[minIdx].time) {
+      minIdx = leftChildIdx;
+    }
+
+    if (rightChildIdx < this.heap.length && this.heap[rightChildIdx].time < this.heap[minIdx].time) {
+      minIdx = rightChildIdx;
+    }
+
+    if (minIdx === idx) return;
+
+    this.swap(minIdx, idx);
+    this.heapifyDown(minIdx);
+  }
+
+  getSize() {
+    return this.heap.length;
+  }
 }
 
-console.log(solution());
+const visited = Array.from({ length: 100001 }, () => false);
+const pq = new PQ();
+let answer = 0;
+
+pq.push(N, 0);
+
+while (pq.getSize() > 0) {
+  const { pos, time } = pq.pop();
+  if (pos === K) {
+    answer = time;
+    break;
+  }
+  if (visited[pos]) continue;
+  visited[pos] = true;
+
+  for (let [nextPos, nextTime] of [
+    [pos * 2, time],
+    [pos - 1, time + 1],
+    [pos + 1, time + 1],
+  ]) {
+    if (nextPos < 0 || nextPos > 100000) continue;
+
+    pq.push(nextPos, nextTime);
+  }
+}
+
+console.log(answer);
