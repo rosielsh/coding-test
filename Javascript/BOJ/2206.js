@@ -1,54 +1,102 @@
-const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-const input = require("fs").readFileSync(filePath).toString().replace(/\r/g, "").trim().split("\n");
-
-const [N, M] = input.shift().split(" ").map(Number);
-const map = input.map((x) => x.split("").map(Number));
-
-const dx = [-1, 1, 0, 0];
-const dy = [0, 0, -1, 1];
-
-function bfs() {
-  const queue = [[0, 0, 0]];
-  const visited = Array.from({ length: N }, () =>
-    Array.from({ length: M }, () => Array(2).fill(0))
-  );
-
-  visited[0][0][0] = 1;
-
-  // visited[a][b][0/1] => 0:벽을 부수지 않고 방문, 1:벽을 부수고 방문
-  // ex) visited[a][b][1] = (a, b)까지 벽을 부쉈을 때 이동한 최단거리 저장
-  let idx = 0;
-  while (queue.length !== idx) {
-    const [x, y, isBreak] = queue[idx];
-
-    if (x === N - 1 && y === M - 1) {
-      // 현재 상태에서의 최단 경로 반환
-      return visited[N - 1][M - 1][isBreak];
-    }
-
-    for (let i = 0; i < 4; i++) {
-      const nx = x + dx[i];
-      const ny = y + dy[i];
-
-      if (nx < 0 || nx >= N || ny < 0 || ny >= M) continue;
-
-      // 간 곳이 벽인 경우
-      if (map[nx][ny]) {
-        if (isBreak) continue;
-        visited[nx][ny][1] = visited[x][y][0] + 1;
-        queue.push([nx, ny, 1]);
-      }
-      // 간 곳이 벽이 아닌 경우
-      else {
-        if (visited[nx][ny][isBreak]) continue;
-        visited[nx][ny][isBreak] = visited[x][y][isBreak] + 1;
-        queue.push([nx, ny, isBreak]);
-      }
-    }
-    idx++;
+class Node {
+  constructor(x, y, dist, breaked) {
+    this.x = x;
+    this.y = y;
+    this.dist = dist;
+    this.breaked = breaked;
+    this.next = null;
   }
-
-  return -1;
 }
 
-console.log(bfs());
+class Queue {
+  constructor() {
+    this.head = null;
+    this.tail = null;
+    this.size = 0;
+  }
+
+  push(x, y, dist, breaked) {
+    const newNode = new Node(x, y, dist, breaked);
+
+    if (this.size === 0) {
+      this.head = newNode;
+    } else {
+      this.tail.next = newNode;
+    }
+
+    this.tail = newNode;
+    this.size++;
+  }
+
+  shift() {
+    const value = this.head;
+
+    if (this.size === 0) return;
+
+    this.head = this.head.next;
+    this.size--;
+
+    if (this.size === 0) {
+      this.head = null;
+      this.tail = null;
+    }
+
+    return value;
+  }
+
+  isEmpty() {
+    return this.size === 0;
+  }
+}
+
+const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
+const input = require("fs").readFileSync(filePath).toString().trim().split("\n");
+
+const [N, M] = input[0].split(" ").map(Number);
+const map = input.slice(1).map((x) => x.split("").map(Number));
+
+const visited = Array.from({ length: 2 }, () => Array.from({ length: N }, () => Array(M).fill(false)));
+visited[0][0][0] = true;
+
+const dx = [0, 0, -1, 1];
+const dy = [-1, 1, 0, 0];
+
+let answer = -1;
+const queue = new Queue();
+
+queue.push(0, 0, 1, 0);
+
+while (!queue.isEmpty()) {
+  const { x, y, dist, breaked } = queue.shift();
+
+  if (x === N - 1 && y === M - 1) {
+    answer = dist;
+    break;
+  }
+
+  for (let i = 0; i < 4; i++) {
+    const nx = x + dx[i];
+    const ny = y + dy[i];
+
+    if (nx < 0 || nx >= N || ny < 0 || ny >= M) continue;
+    if (visited[breaked][nx][ny]) continue;
+
+    // 다음 위치가 벽이 아니면
+    if (map[nx][ny] === 0) {
+      visited[breaked][nx][ny] = true;
+      queue.push(nx, ny, dist + 1, breaked);
+      continue;
+    }
+
+    // 다음 위치가 벽이면
+    if (map[nx][ny] === 1) {
+      if (breaked) continue;
+      if (visited[1][nx][ny]) continue;
+
+      visited[breaked + 1][nx][ny] = true;
+      queue.push(nx, ny, dist + 1, breaked + 1);
+    }
+  }
+}
+
+console.log(answer);
