@@ -1,50 +1,20 @@
-// 작업
-
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-let [N, ...input] = require("fs").readFileSync(filePath).toString().trim().split("\n");
-N = +N;
+const input = require("fs").readFileSync(filePath).toString().trim().split("\n");
 
-function solution() {
-  let answer;
+const N = +input[0];
+const info = input.slice(1).map((x) => x.split(" ").map(Number));
 
-  const graph = Array.from({ length: N + 1 }, () => []);
-  const indegree = Array.from({ length: N + 1 }, () => 0);
-  const duringTime = Array.from({ length: N + 1 }, () => 0);
+const dp = Array.from({ length: N + 1 }, () => 0); // 모든 작업을 완료하기 위한 최소 시간
+dp[1] = info[0][0];
 
-  input.forEach((arr, idx) => {
-    const [time, preWorkCnt, ...preWorks] = arr.split(" ").map(Number);
+for (let i = 2; i <= N; i++) {
+  const [time, cnt, ...nums] = info[i - 1];
 
-    indegree[idx + 1] = preWorkCnt;
-    duringTime[idx + 1] = time;
+  dp[i] = time;
 
-    preWorks.forEach((work) => {
-      graph[work].push(idx + 1);
-    });
-  });
-
-  const queue = [];
-
-  const dp = Array.from({ length: N + 1 }, () => 0);
-  for (let i = 1; i <= N; i++) {
-    if (indegree[i] === 0) {
-      queue.push([i, duringTime[i]]);
-      dp[i] = duringTime[i];
-    }
+  for (let num of nums) {
+    dp[i] = Math.max(dp[i], dp[num] + time);
   }
-
-  while (queue.length) {
-    const [curNode, sumTime] = queue.shift();
-
-    graph[curNode].forEach((nextNode) => {
-      indegree[nextNode]--;
-
-      // 다음 방문할 노드에 대해서 최댓값을 항상 갱신해줘야 한다.
-      dp[nextNode] = Math.max(dp[curNode] + duringTime[nextNode], dp[nextNode]);
-      if (indegree[nextNode] === 0) queue.push([nextNode, sumTime + duringTime[nextNode]]);
-    });
-  }
-  answer = Math.max(...dp);
-  return answer;
 }
 
-console.log(solution());
+console.log(Math.max(...dp));
