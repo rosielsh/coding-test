@@ -1,33 +1,33 @@
-// 내리막 길
-
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-[MN, ...map] = require("fs").readFileSync(filePath).toString().trim().split("\n");
-[M, N] = MN.split(" ").map(Number);
-map = map.map((x) => x.split(" ").map(Number));
+const input = require("fs").readFileSync(filePath).toString().trim().split("\n");
 
-const route = Array.from({ length: M }, () => Array(N).fill(-1));
-route[M - 1][N - 1] = 1;
-const dy = [0, 0, -1, 1];
-const dx = [1, -1, 0, 0];
+const [N, M] = input[0].split(" ").map(Number);
+const map = input.slice(1).map((x) => x.split(" ").map(Number));
 
-function dfs(y, x) {
-  if (route[y][x] !== -1) return route[y][x];
+const dp = Array.from({ length: N }, () => Array(M).fill(-1)); // 경로 개수
 
-  let cnt = 0;
+const dx = [0, 0, -1, 1];
+const dy = [-1, 1, 0, 0];
+
+const dfs = (x, y) => {
+  if (x === N - 1 && y === M - 1) return (dp[x][y] = 1);
+
+  if (dp[x][y] !== -1) return dp[x][y];
+
+  dp[x][y] = 0;
 
   for (let i = 0; i < 4; i++) {
-    ny = y + dy[i];
-    nx = x + dx[i];
+    const nx = x + dx[i];
+    const ny = y + dy[i];
 
-    if (ny < 0 || ny >= M || nx < 0 || nx >= N) continue;
-    if (map[ny][nx] >= map[y][x]) continue;
+    if (nx < 0 || nx >= N || ny < 0 || ny >= M || map[x][y] <= map[nx][ny]) continue;
 
-    cnt += dfs(ny, nx);
+    dp[x][y] += dfs(nx, ny);
   }
 
-  route[y][x] = cnt;
+  return dp[x][y];
+};
 
-  return cnt;
-}
+dfs(0, 0);
 
-console.log(dfs(0, 0));
+console.log(dp[0][0]);
