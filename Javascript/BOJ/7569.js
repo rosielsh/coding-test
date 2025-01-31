@@ -1,13 +1,11 @@
-// 토마토
-
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-[MNH, ...tomato] = require("fs").readFileSync(filePath).toString().trim().split("\n");
-[M, N, H] = MNH.split(" ").map(Number);
-tomato = tomato.map((x) => x.split(" ").map(Number));
+const input = require("fs").readFileSync(filePath).toString().trim().split("\n");
 
-const tomatoMatrix = [];
+const [M, N, H] = input.shift().split(" ").map(Number);
+const tomato = [];
+
 for (let i = 0; i < H; i++) {
-  tomatoMatrix.push(tomato.splice(0, N));
+  tomato.push(input.splice(0, N).map((x) => x.split(" ").map(Number)));
 }
 
 class Node {
@@ -20,94 +18,90 @@ class Node {
 class Queue {
   constructor() {
     this.head = null;
-    this.rear = null;
-    this.length = 0;
+    this.tail = null;
+    this.size = 0;
   }
 
-  enqueue(data) {
-    const node = new Node(data);
-    if (!this.head) this.head = node;
-    else this.rear.next = node;
+  push(data) {
+    const newNode = new Node(data);
 
-    this.rear = node;
-    this.length++;
+    if (this.size === 0) {
+      this.head = newNode;
+    } else {
+      this.tail.next = newNode;
+    }
+
+    this.tail = newNode;
+    this.size++;
   }
 
-  dequeue() {
-    if (!this.head) return;
+  shift() {
     const data = this.head.data;
+
     this.head = this.head.next;
-    this.length--;
+    this.size--;
+
+    if (this.size === 0) {
+      this.head = null;
+      this.tail = null;
+    }
+
     return data;
   }
 
-  getLength() {
-    return this.length;
-  }
-
-  getQueue() {
-    return this.head;
+  isEmpty() {
+    return this.size === 0;
   }
 }
 
-function isAllRipe() {
-  for (let k = 0; k < H; k++) {
-    for (let i = 0; i < N; i++) {
-      for (let j = 0; j < M; j++) {
-        if (tomatoMatrix[k][i][j] === 0) return false;
+const dx = [0, 0, -1, 1, 0, 0];
+const dy = [-1, 1, 0, 0, 0, 0];
+const dz = [0, 0, 0, 0, -1, 1];
+
+const bfs = () => {
+  let maxDay = 0;
+  const queue = new Queue();
+
+  for (let i = 0; i < H; i++) {
+    for (let j = 0; j < N; j++) {
+      for (let k = 0; k < M; k++) {
+        if (tomato[i][j][k] === 1) {
+          queue.push([i, j, k, 0]);
+        }
       }
     }
   }
-  return true;
-}
 
-const posY = [0, 0, -1, 1, 0, 0];
-const posX = [-1, 1, 0, 0, 0, 0];
-const posZ = [0, 0, 0, 0, 1, -1];
-let maxDay = Number.MIN_SAFE_INTEGER;
+  while (!queue.isEmpty()) {
+    const [cz, cx, cy, day] = queue.shift();
 
-function bfs(ripeTomato) {
-  const needVisit = new Queue();
-  for (let i = 0; i < ripeTomato.length; i++) {
-    needVisit.enqueue(ripeTomato[i]);
-  }
-
-  while (needVisit.getLength()) {
-    [curZ, curY, curX, day] = needVisit.dequeue();
+    maxDay = Math.max(maxDay, day);
 
     for (let i = 0; i < 6; i++) {
-      adjY = curY + posY[i];
-      adjX = curX + posX[i];
-      adjZ = curZ + posZ[i];
+      const nx = cx + dx[i];
+      const ny = cy + dy[i];
+      const nz = cz + dz[i];
 
-      if (adjY < 0 || adjY >= N || adjX < 0 || adjX >= M || adjZ < 0 || adjZ >= H) continue;
+      if (nx < 0 || nx >= N || ny < 0 || ny >= M || nz < 0 || nz >= H) continue;
 
-      if (!tomatoMatrix[adjZ][adjY][adjX]) {
-        tomatoMatrix[adjZ][adjY][adjX] = day + 1;
-        needVisit.enqueue([adjZ, adjY, adjX, day + 1]);
-        maxDay = Math.max(day + 1, maxDay);
-      }
-    }
-  }
-}
-
-function solution() {
-  if (isAllRipe()) return 0;
-
-  let ripeTomato = [];
-
-  for (let k = 0; k < H; k++) {
-    for (let i = 0; i < N; i++) {
-      for (let j = 0; j < M; j++) {
-        if (tomatoMatrix[k][i][j] === 1) ripeTomato.push([k, i, j, 0]);
+      if (tomato[nz][nx][ny] === 0) {
+        tomato[nz][nx][ny] = 1;
+        queue.push([nz, nx, ny, day + 1]);
       }
     }
   }
 
-  bfs(ripeTomato);
-  if (!isAllRipe()) return -1;
+  for (let i = 0; i < H; i++) {
+    for (let j = 0; j < N; j++) {
+      for (let k = 0; k < M; k++) {
+        if (!tomato[i][j][k]) {
+          return -1;
+        }
+      }
+    }
+  }
 
   return maxDay;
-}
+};
 
-console.log(solution());
+console.log(bfs());
