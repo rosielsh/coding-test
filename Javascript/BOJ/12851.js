@@ -1,10 +1,9 @@
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
-const [N, K] = require("fs").readFileSync(filePath).toString().trim().split(" ").map(Number);
+const input = require("fs").readFileSync(filePath).toString().trim().split("\n");
 
 class Node {
-  constructor(pos, time) {
-    this.pos = pos;
-    this.time = time;
+  constructor(data) {
+    this.data = data;
     this.next = null;
   }
 }
@@ -16,24 +15,20 @@ class Queue {
     this.size = 0;
   }
 
-  push(pos, time) {
-    const newNode = new Node(pos, time);
+  push(data) {
+    const newNode = new Node(data);
 
-    if (this.head === null) {
+    if (this.size === 0) {
       this.head = newNode;
     } else {
       this.tail.next = newNode;
     }
-
     this.tail = newNode;
     this.size++;
   }
 
   shift() {
-    const value = this.head;
-    if (this.head === null) {
-      return;
-    }
+    const data = this.head.data;
 
     this.head = this.head.next;
     this.size--;
@@ -43,43 +38,54 @@ class Queue {
       this.tail = null;
     }
 
-    return value;
+    return data;
   }
 
-  getSize() {
-    return this.size;
+  isEmpty() {
+    return this.size === 0;
   }
 }
 
-const visited = Array.from({ length: 100001 }, () => Array(2).fill(Infinity));
-const queue = new Queue(); // n에서 시작하고 현재까지 갈 수 있는 최단 시간을 저장
+const [N, K] = input[0].split(" ").map(Number);
 
-queue.push(N, 0);
+const visited = Array.from({ length: 100001 }, () => Array(2).fill(-1));
+const queue = new Queue();
+queue.push([N, 0]);
 
 visited[N][0] = 0;
 visited[N][1] = 1;
 
-while (queue.getSize() > 0) {
-  const { pos, time } = queue.shift();
+let answer = 0;
+let minTime = -1;
 
-  for (let next of [pos - 1, pos + 1, pos * 2]) {
-    // 범위 체크
-    if (next < 0 || next > 100000) continue;
+while (!queue.isEmpty()) {
+  const [x, time] = queue.shift();
 
-    // 이미 방문 시간이 더 작으면
-    if (visited[next][0] < time + 1) continue;
+  if (minTime !== -1 && minTime < time) break;
 
-    // 같은 시간에 방문 했다면
-    if (visited[next][0] === time + 1) {
-      visited[next][1] += visited[pos][1];
-      continue;
+  if (x === K) {
+    if (minTime === -1) {
+      minTime = time;
     }
 
-    // 최단 시간에 처음 방문했다면
-    visited[next][0] = time + 1;
-    visited[next][1] = visited[pos][1];
-    queue.push(next, time + 1);
+    answer += visited[x][1];
+    continue;
+  }
+
+  for (let nx of [x - 1, x + 1, 2 * x]) {
+    if (nx < 0 || nx > 100000) continue;
+
+    // 처음 방문한 위치
+    if (visited[nx][0] === -1) {
+      visited[nx][0] = time + 1;
+      visited[nx][1] = visited[x][1];
+      queue.push([nx, time + 1]);
+    }
+    // 방문한 적 있는데, 같은 시간에 방문했던 경우
+    else if (visited[nx][0] === time + 1) {
+      visited[nx][1] += visited[x][1];
+    }
   }
 }
 
-console.log(visited[K].join("\n"));
+console.log(minTime, answer);
