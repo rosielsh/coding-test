@@ -1,49 +1,51 @@
 const filePath = process.platform === "linux" ? "/dev/stdin" : "./input.txt";
 const input = require("fs").readFileSync(filePath).toString().trim().split("\n");
-
 const T = +input.shift();
-const isPrime = Array.from({ length: 10000 }, () => true);
 
-for (let i = 2; i <= 9999; i++) {
-  if (!isPrime[i]) continue;
+const prime = Array.from({ length: 10001 }, () => true);
 
-  for (let j = i * 2; j <= 9999; j += i) {
-    if (!isPrime[j]) continue;
-    isPrime[j] = false;
+prime[1] = false;
+
+for (let i = 2; i <= 100; i++) {
+  for (let j = i * 2; j <= 10000; j += i) {
+    prime[j] = false;
   }
 }
 
-for (let t = 0; t < T; t++) {
-  const [start, end] = input[t].split(" ").map(Number);
+const answer = [];
 
-  const visited = Array.from({ length: 10000 }, () => -1);
-  const queue = [start];
+for (let i = 0; i < T; i++) {
+  const [f, t] = input[i].split(" ").map(Number);
+  const visited = Array.from({ length: 10001 }, () => false);
+  const queue = [];
 
-  visited[start] = 0;
+  queue.push([f, 0]);
+  visited[f] = true;
 
   while (queue.length > 0) {
-    const cur = queue.shift();
+    const [num, cnt] = queue.shift();
 
-    if (cur === end) {
+    if (num === t) {
+      answer.push(cnt);
       break;
     }
 
     for (let i = 0; i < 4; i++) {
-      const curStr = String(cur).split("");
+      const prev = String(num).split("");
       for (let j = 0; j <= 9; j++) {
-        if (curStr[i] === String(j)) continue;
+        if (prev[i] === j) continue;
 
-        curStr[i] = String(j);
-        const next = +curStr.join("");
+        prev[i] = j;
 
-        if (next < 1000) continue;
-        if (!isPrime[next] || visited[next] > -1) continue;
+        const next = +[...prev].join("");
 
-        visited[next] = visited[cur] + 1;
-        queue.push(next);
+        if (next < 1000 || visited[next] || !prime[next]) continue;
+
+        visited[next] = true;
+        queue.push([next, cnt + 1]);
       }
     }
   }
-
-  console.log(visited[end]);
 }
+
+console.log(answer.join("\n"));
